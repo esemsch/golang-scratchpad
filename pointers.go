@@ -31,12 +31,10 @@ func main() {
 
 func swap(a *[]string, b *[]string) {
 	x := *a
-	println(x)
-	println(a)
-	println(*a)
+	println("x =", x)
+	println("*a =", *a)
 	*a = *b
-	println(a)
-	println(*a)
-
+	println("*a =", *a)
 	*b = x
+	println("*b =", *b)
 }
