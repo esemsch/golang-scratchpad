@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strings"
 )
 
 func main() {
@@ -42,6 +44,22 @@ func main() {
 
 	}
 
-	fmt.Println(string(wholeFile))
+	allWords := strings.Split(string(wholeFile), " ")
+
+	wordsWithCounts := make(map[string]int)
+	pattern := regexp.MustCompile("^\\s*(\\w+)[.,;]\\s*")
+	for _, w := range allWords {
+		sanitizedWord := strings.ToLower(pattern.ReplaceAllString(w, "$1"))
+		if len(sanitizedWord) > 0 {
+			count, ok := wordsWithCounts[sanitizedWord]
+			if ok {
+				wordsWithCounts[sanitizedWord] = count + 1
+			} else {
+				wordsWithCounts[sanitizedWord] = 1
+			}
+		}
+	}
+
+	fmt.Println(wordsWithCounts)
 
 }
