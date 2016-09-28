@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type WordCount struct {
@@ -75,11 +75,26 @@ func main() {
 
 	T = time.Now().UnixNano()
 	wordsWithCounts := make(map[string]int)
-	pattern := regexp.MustCompile("^\\s*(\\w+)[.,;?!]\\s*")
+	punctuation := []rune{'.', ',', '!', '?', ';'}
 	for _, l := range allLines {
 		for _, w := range strings.Split(l, " ") {
-			sanitizedWord := strings.ToLower(pattern.ReplaceAllString(w, "$1"))
-			if len(sanitizedWord) > 0 {
+			withoutPunctuation := make([]rune, len(w))
+			pos := 0
+			for _, r := range w {
+				isPunctuation := false
+				for _, p := range punctuation {
+					if r == p {
+						isPunctuation = true
+						break
+					}
+				}
+				if !isPunctuation {
+					withoutPunctuation[pos] = unicode.ToLower(r)
+					pos++
+				}
+			}
+			if pos > 0 {
+				sanitizedWord := string(withoutPunctuation[:pos])
 				count, ok := wordsWithCounts[sanitizedWord]
 				if ok {
 					wordsWithCounts[sanitizedWord] = count + 1
