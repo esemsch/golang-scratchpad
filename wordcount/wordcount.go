@@ -5,8 +5,28 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
+
+type WordCount struct {
+	count int
+	word  string
+}
+
+type WordCounts []WordCount
+
+func (wc WordCounts) Len() int      { return len(wc) }
+func (wc WordCounts) Swap(i, j int) { wc[i], wc[j] = wc[j], wc[i] }
+func (wc WordCounts) Less(i, j int) bool {
+	if wc[i].count > wc[j].count {
+		return true
+	} else if wc[i].count < wc[j].count {
+		return false
+	} else {
+		return strings.Compare(wc[i].word, wc[j].word) < 0
+	}
+}
 
 func main() {
 	args := os.Args
@@ -44,22 +64,32 @@ func main() {
 
 	}
 
-	allWords := strings.Split(string(wholeFile), " ")
+	allLines := strings.Split(string(wholeFile), "\n")
 
 	wordsWithCounts := make(map[string]int)
-	pattern := regexp.MustCompile("^\\s*(\\w+)[.,;]\\s*")
-	for _, w := range allWords {
-		sanitizedWord := strings.ToLower(pattern.ReplaceAllString(w, "$1"))
-		if len(sanitizedWord) > 0 {
-			count, ok := wordsWithCounts[sanitizedWord]
-			if ok {
-				wordsWithCounts[sanitizedWord] = count + 1
-			} else {
-				wordsWithCounts[sanitizedWord] = 1
+	pattern := regexp.MustCompile("^\\s*(\\w+)[.,;?!]\\s*")
+	for _, l := range allLines {
+		for _, w := range strings.Split(l, " ") {
+			sanitizedWord := strings.ToLower(pattern.ReplaceAllString(w, "$1"))
+			if len(sanitizedWord) > 0 {
+				count, ok := wordsWithCounts[sanitizedWord]
+				if ok {
+					wordsWithCounts[sanitizedWord] = count + 1
+				} else {
+					wordsWithCounts[sanitizedWord] = 1
+				}
 			}
 		}
 	}
 
-	fmt.Println(wordsWithCounts)
+	wordCounts := WordCounts{}
+	for word, count := range wordsWithCounts {
+		wordCounts = append(wordCounts, WordCount{count: count, word: word})
+	}
 
+	sort.Sort(wordCounts)
+
+	for _, wc := range wordCounts {
+		fmt.Printf("%s %dx\n", wc.word, wc.count)
+	}
 }
