@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 )
 
 type WordCount struct {
@@ -28,6 +29,8 @@ func (wc WordCounts) Less(i, j int) bool {
 	}
 }
 
+const MILLION int64 = 1000000
+
 func main() {
 	args := os.Args
 	if len(args) != 2 {
@@ -43,6 +46,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	T := time.Now().UnixNano()
 	wholeFile := []byte{}
 	buffer := make([]byte, 4096)
 
@@ -63,9 +67,13 @@ func main() {
 		}
 
 	}
+	fmt.Println("Reading", (time.Now().UnixNano()-T)/MILLION, "ms")
 
+	T = time.Now().UnixNano()
 	allLines := strings.Split(string(wholeFile), "\n")
+	fmt.Println("Splitting", (time.Now().UnixNano()-T)/MILLION, "ms")
 
+	T = time.Now().UnixNano()
 	wordsWithCounts := make(map[string]int)
 	pattern := regexp.MustCompile("^\\s*(\\w+)[.,;?!]\\s*")
 	for _, l := range allLines {
@@ -81,14 +89,20 @@ func main() {
 			}
 		}
 	}
+	fmt.Println("Counting", (time.Now().UnixNano()-T)/MILLION, "ms")
 
+	T = time.Now().UnixNano()
 	wordCounts := WordCounts{}
 	for word, count := range wordsWithCounts {
 		wordCounts = append(wordCounts, WordCount{count: count, word: word})
 	}
+	fmt.Println("Converting to list of structs", (time.Now().UnixNano()-T)/MILLION, "ms")
 
+	T = time.Now().UnixNano()
 	sort.Sort(wordCounts)
+	fmt.Println("Sorting", (time.Now().UnixNano()-T)/MILLION, "ms")
 
+	fmt.Println("==== RESULTS ====")
 	for _, wc := range wordCounts {
 		fmt.Printf("%s %dx\n", wc.word, wc.count)
 	}
