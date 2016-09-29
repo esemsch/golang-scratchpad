@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/path"
 	"math"
 )
 
@@ -26,44 +27,45 @@ func (e Edge) To() graph.Node { return graph.Node(e.b) }
 func (e Edge) Weight() float64 { return math.Sqrt(math.Pow(e.a.x-e.b.x, 2) + math.Pow(e.a.y-e.b.y, 2)) }
 
 type Graph struct {
-	nodes []Node
-	edges map[Node][]Edge
+	nodes []graph.Node
+	edges map[graph.Node][]Edge
 }
-											// Edge returns the edge from u to v if such an edge
-												// exists and nil otherwise. The node v must be directly
-													// reachable from u as defined by the From method.
-													Edge(u, v Node) Edge
-func (g Graph) Has(node Node) bool {
-	_,ok := edges[node]
+
+func (g Graph) Has(node graph.Node) bool {
+	_, ok := g.edges[node]
 	return ok
 }
 
-func (g Graph) Nodes() []Node { return nodes }
+func (g Graph) Nodes() []graph.Node { return g.nodes }
 
-func (g Graph) From(node Node) []Node {
-	es,ok := g.edges[node]
-	retVal := []Node{}
+func (g Graph) From(node graph.Node) []graph.Node {
+	es, ok := g.edges[node]
+	retVal := []graph.Node{}
 	if ok {
-		for _,e := range es {
-			retVal = append(retVal,e.b)
+		for _, e := range es {
+			retVal = append(retVal, e.b)
 		}
 	}
 	return retVal
 }
 
-func (g Graph) HasEdgeBetween(x, y Node) bool {return Edge(x,y)!=nil}
+func (g Graph) HasEdgeBetween(x, y graph.Node) bool { return g.Edge(x, y) != nil }
 
-func (g Graph) Edge(u, v Node) Edge {
-	ex := g.From(x)
-	ey := g.From(y)
-	for e := range ex {
-		if e.b == y {
-			return e
+func (g Graph) Edge(x, y graph.Node) graph.Edge {
+	ex, okx := g.edges[x]
+	ey, oky := g.edges[y]
+	if okx {
+		for _, e := range ex {
+			if e.b == y {
+				return e
+			}
 		}
 	}
-	for e := range ey {
-		if e.b == x {
-			return e
+	if oky {
+		for _, e := range ey {
+			if e.b == x {
+				return e
+			}
 		}
 	}
 	return nil
@@ -72,7 +74,7 @@ func (g Graph) Edge(u, v Node) Edge {
 
 func main() {
 	nodes := []Node{}
-	edges := []Edge{}
+	edges := make(map[graph.Node][]Edge)
 
 	const X_SIZE = 2
 	const Y_SIZE = 2
@@ -84,13 +86,22 @@ func main() {
 
 	for i := 0; i < X_SIZE; i++ {
 		for j := 0; j < Y_SIZE; j++ {
-			edges = append(edges, generateEdges(i, j, nodes, X_SIZE, Y_SIZE)...)
+			node := nodes[i*X_SIZE+j]
+			es := generateEdges(i, j, nodes, X_SIZE, Y_SIZE)
+			edges[node] = es
 		}
 	}
 
-	fmt.Printf("%d nodes, %s edges\n", len(nodes), len(edges))
+	graphNodes := make([]graph.Node, len(nodes))
+	for i, n := range nodes {
+		graphNodes[i] = n
+	}
 
+	fmt.Printf("%d nodes, %d edges\n", len(nodes), len(edges))
 
+	G := Graph{nodes: graphNodes, edges: edges}
+
+	path.AStar(nodes[0], nodes[10], G, func(n, m graph.Node) float64 { return G.Edge(n, m).Weight() })
 }
 
 func generateEdges(x, y int, nodes []Node, X_SIZE, Y_SIZE int) []Edge {
