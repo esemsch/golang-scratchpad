@@ -24,7 +24,10 @@ func (e Edge) From() graph.Node { return graph.Node(e.a) }
 
 func (e Edge) To() graph.Node { return graph.Node(e.b) }
 
-func (e Edge) Weight() float64 { return math.Sqrt(math.Pow(e.a.x-e.b.x, 2) + math.Pow(e.a.y-e.b.y, 2)) }
+func euclDist(a, b Node) float64 {
+	return math.Sqrt(math.Pow(a.x-b.x, 2) + math.Pow(a.y-b.y, 2))
+}
+func (e Edge) Weight() float64 { return euclDist(e.a, e.b) }
 
 type Graph struct {
 	nodes []graph.Node
@@ -72,23 +75,37 @@ func (g Graph) Edge(x, y graph.Node) graph.Edge {
 
 }
 
+func (g Graph) Weight(x, y graph.Node) (w float64, ok bool) {
+	if x.ID() == y.ID() {
+		return 0.0, true
+	}
+	edge := g.Edge(x, y)
+	if edge != nil {
+		return edge.Weight(), true
+	} else {
+		return 0.0, false
+	}
+}
+
 func main() {
 	nodes := []Node{}
 	edges := make(map[graph.Node][]Edge)
 
-	const X_SIZE = 2
-	const Y_SIZE = 2
+	const X_SIZE = 1000
+	const Y_SIZE = 1000
 	for i := 0; i < X_SIZE; i++ {
 		for j := 0; j < Y_SIZE; j++ {
 			nodes = append(nodes, Node{x: float64(i), y: float64(j), id: i*X_SIZE + j})
 		}
 	}
 
+	edgeCounter := 0
 	for i := 0; i < X_SIZE; i++ {
 		for j := 0; j < Y_SIZE; j++ {
 			node := nodes[i*X_SIZE+j]
 			es := generateEdges(i, j, nodes, X_SIZE, Y_SIZE)
 			edges[node] = es
+			edgeCounter += len(es)
 		}
 	}
 
@@ -97,11 +114,19 @@ func main() {
 		graphNodes[i] = n
 	}
 
-	fmt.Printf("%d nodes, %d edges\n", len(nodes), len(edges))
+	fmt.Printf("%d nodes, %d edges\n", len(nodes), edgeCounter)
 
 	G := Graph{nodes: graphNodes, edges: edges}
 
-	path.AStar(nodes[0], nodes[10], G, func(n, m graph.Node) float64 { return G.Edge(n, m).Weight() })
+	from := nodes[0]
+	to := nodes[X_SIZE*Y_SIZE-2]
+	//to := nodes[X_SIZE*(Y_SIZE-1)+Y_SIZE/2]
+	heuristic := func(n, m graph.Node) float64 { return euclDist(n.(Node), m.(Node)) }
+	//heuristic := func(n, m graph.Node) float64 { return 0 }
+	path, exp := path.AStar(from, to, G, heuristic)
+
+	nodesOnPath, dist := path.To(to)
+	fmt.Println(nodesOnPath, "Distance:", dist, "Nodes expanded:", exp)
 }
 
 func generateEdges(x, y int, nodes []Node, X_SIZE, Y_SIZE int) []Edge {
