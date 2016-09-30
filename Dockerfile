@@ -16,7 +16,7 @@ RUN echo "execute pathogen#infect() \n\
 filetype plugin indent on \n\
 Helptags" > ~/.vimrc
 RUN git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go 
-RUN git clone  https://github.com/esemsch/golang-scratchpad go/src/github.com/esemsch/golang-scratchpad 
+RUN git clone  https://esemsch@github.com/esemsch/golang-scratchpad go/src/github.com/esemsch/golang-scratchpad 
 RUN export PATH=$PATH:/usr/local/go/bin; export GOPATH=/go; vim -c GoInstallBinaries -c q
 RUN git config --global user.email "eduard.semsch@seznam.cz"; git config --global user.name "Eduard Semsch"
 
