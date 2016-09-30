@@ -6,11 +6,6 @@ import (
 	"os"
 )
 
-type X struct {
-	aa string
-	bb int
-}
-
 func main() {
 	var x interface{}
 	err := json.Unmarshal([]byte("{\"x\":1,\"y\":2}"), &x)
@@ -22,13 +17,12 @@ func main() {
 
 	marsh(x)
 
-	/*	var y struct {
-			a string
-			b int
-		}
+	var y struct {
+		A string
+		B int
+	}
 
-		y.a, y.b = "Something", 10*/
-	y := X{"Ahoj", 10}
+	y.A, y.B = "Something", 10
 
 	marsh(y)
 
