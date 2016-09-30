@@ -1,0 +1,14 @@
+this:
+        is:
+                some: "yaml"
+it: ["can", "have", "some", "json", "lists"]
+or:
+        - it
+        - can
+        - have
+        - these
+        - nice
+        - yaml
+        - lists
+plus: 
+        what_about_key_words_like_this: OFF
