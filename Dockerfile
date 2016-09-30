@@ -23,3 +23,5 @@ ENV GOPATH=/go
 ENV PATH=$PATH:/usr/local/go/bin 
 ENV GOBIN=$GOPATH/bin 
 ENV PATH=$PATH:$GOBIN 
+
+CMD /bin/bash
