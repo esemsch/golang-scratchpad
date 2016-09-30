@@ -3,37 +3,44 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 )
 
 func main() {
-	var x interface{}
-	err := json.Unmarshal([]byte("{\"x\":1,\"y\":2}"), &x)
-	if err != nil {
-		fmt.Println(os.Stderr, "Error unmarshalling:", err)
-	} else {
-		fmt.Println(x)
-	}
+	x := unmarsh("{\"x\":1,\"y\":2}", new(interface{}))
 
-	marsh(x)
+	fmt.Println(x)
+
+	fmt.Println(marsh(x))
 
 	var y struct {
-		A string
-		B int
+		A string `json:"a"`
+		B int    "json:\"b\""
 	}
 
 	y.A, y.B = "Something", 10
 
-	marsh(y)
+	fmt.Println(marsh(y))
+
+	z := unmarsh(`{"a":"something","b":100}`, &y)
+
+	fmt.Println(z)
 
 }
 
-func marsh(x interface{}) {
-	fmt.Println(x)
-	jsn, err := json.Marshal(x)
+func unmarsh(in string, out interface{}) interface{} {
+	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
-		fmt.Println(os.Stderr, "Error marshalling:", err)
+		panic(err)
 	} else {
-		fmt.Println(string(jsn))
+		return out
+	}
+}
+
+func marsh(in interface{}) string {
+	out, err := json.Marshal(in)
+	if err != nil {
+		panic(err)
+	} else {
+		return string(out)
 	}
 }
