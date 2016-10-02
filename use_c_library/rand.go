@@ -3,14 +3,10 @@
 
 package main
 
-/*
-#include <stdlib.h>
-*/
-
-import (
-	"C"
-	"fmt"
-)
+//#include<stdlib.h>
+////It is absolutely necessary that the line reads only import "C".  Importing multiple packages doesn't work!!
+import "C"
+import "fmt"
 
 func Random() int {
 	return int(C.random())
