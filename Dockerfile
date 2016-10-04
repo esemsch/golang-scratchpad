@@ -12,9 +12,10 @@ RUN mkdir go
 RUN mkdir -p ~/.vim/autoload ~/.vim/bundle;
 RUN wget -O ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim 
 RUN echo "execute pathogen#infect() \n\
- syntax on \n\
+syntax on \n\
 filetype plugin indent on \n\
-Helptags" > ~/.vimrc
+Helptags\n\
+let g:go_fmt_command = \"goimports\"" > ~/.vimrc
 RUN git clone https://github.com/fatih/vim-go.git ~/.vim/bundle/vim-go 
 RUN git clone  https://esemsch@github.com/esemsch/golang-scratchpad go/src/github.com/esemsch/golang-scratchpad 
 RUN export PATH=$PATH:/usr/local/go/bin; export GOPATH=/go; vim -c GoInstallBinaries -c q
