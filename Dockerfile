@@ -5,6 +5,7 @@ RUN apt-get install -y wget
 RUN apt-get install -y vim
 RUN apt-get install -y git
 RUN apt-get install -y man
+RUN apt-get install -y gcc 
 RUN wget https://storage.googleapis.com/golang/go1.7.1.linux-amd64.tar.gz 
 RUN tar -C /usr/local -xzf go1.7.1.linux-amd64.tar.gz 
 RUN mkdir go 
